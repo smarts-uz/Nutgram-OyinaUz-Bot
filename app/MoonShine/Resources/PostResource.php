@@ -2,6 +2,8 @@
 
 namespace App\MoonShine\Resources;
 
+use App\Models\BotButton;
+use App\Models\Media;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Post;
@@ -110,6 +112,11 @@ class PostResource extends Resource
     public function beforeCreating(Model $item)
     {
         $item->user_id = request()->user()->id;
+    }
+    protected function afterDeleted(Model $item)
+    {
+        $media = Media::where('post_id', $item->id)->delete();
+        $buttons = BotButton::where('post_id',$item->id)->delete();
     }
 
     public function actions(): array

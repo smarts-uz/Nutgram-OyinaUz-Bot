@@ -4,7 +4,10 @@ namespace App\MoonShine\Resources;
 
 
 use App\Jobs\ArtisanJob;
+use App\Models\BotButton;
+use App\Models\Media;
 use App\Models\TgBotText;
+use App\Models\TgGroup;
 use App\Services\BotSetWebhookService;
 use App\Services\TelegramBotService;
 use Barryvdh\Debugbar\Facades\Debugbar;
@@ -65,6 +68,11 @@ class TgBotResource extends Resource
     public function beforeCreating(Model $item)
     {
         $item->user_id = request()->user()->id;
+    }
+    protected function afterDeleted(Model $item)
+    {
+        $botText = TgBotText::where('bot_id', $item->id)->delete();
+        $botGroups = TgGroup::where('tg_bot_id',$item->id)->delete();
     }
     protected function afterCreated(Model $item)
     {
