@@ -23,9 +23,9 @@ class TgGroupResource extends Resource
 	{
 		return [
 		    ID::make()->sortable(),
-            Text::make('Bot Chat Title','title'),
-            Text::make('Group Id','group_id'),
-            Text::make('Bot','tg_bot_id'),
+            Text::make('Bot Chat Title','title')->required(),
+            Text::make('Group Id','group_id')->required(),
+            Text::make('Bot','tg_bot_id')->required(),
             SwitchBoolean::make('ON/OFF','tg_bot_on'),
         ];
 	}

@@ -81,7 +81,7 @@ class PostResource extends Resource
 
                         Column::make([
                             Block::make('Bots',[
-                                BelongsTo::make('Bot','bot','bot_username'),
+                                BelongsTo::make('Bot','bot','bot_username')->required(),
 //                                BelongsTo::make('Group','group',new TgGroupResource())
                             ])
                         ]),

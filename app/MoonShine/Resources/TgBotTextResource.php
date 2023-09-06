@@ -22,9 +22,9 @@ class TgBotTextResource extends Resource
 	{
 		return [
 		    ID::make()->sortable(),
-            Text::make('First Action Message','first_action_msg'),
-            Text::make('Repeated Action Message','repeated_action_msg'),
-            Text::make('Unfollow Users Message','follow_msg'),
+            Text::make('First Action Message','first_action_msg')->required(),
+            Text::make('Repeated Action Message','repeated_action_msg')->required(),
+            Text::make('Unfollow Users Message','follow_msg')->required(),
             HasOne::make('Bot','bots',new TgBotResource())
         ];
 	}

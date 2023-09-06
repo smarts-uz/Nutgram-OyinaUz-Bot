@@ -36,7 +36,7 @@ class TgBotResource extends Resource
 	{
 		return [
 		    ID::make()->sortable(),
-            Text::make('Bot Token','bot_token')->hideOnIndex(),
+            Text::make('Bot Token','bot_token')->hideOnIndex()->required(),
             Url::make('Base Url','base_url')->required(),
             Text::make('Bot Username','bot_username')->hideOnCreate()->hideOnUpdate(),
             HasMany::make('BotGroup','groups',new TgGroupResource())->resourceMode(),
