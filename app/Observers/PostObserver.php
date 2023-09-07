@@ -32,10 +32,21 @@ class PostObserver
             } else {
                 $botService->botDeleteMessage($bot, $post,$botId->id);
             }
+            $channelId = $post->tg_groups_id;
+            $messageId = $post->tg_message_id;
+            $tgChatTitle = $tgChatTitle = $post->tg_chat_title;
+
+            $url = "<a href=\"https://t.me/{$tgChatTitle}/{$messageId}\">{$post->url_title}</a>";
+            $content = $post->content;
+
+            $caption = "{$content} \n $url";
+
+            if (!empty($channelId)) {
+                $botService->createPostTgUrl($post);
+                $botService->botEditeMessage($bot,$channelId,$messageId,$caption,$post);
+            }
         }
-        if ($post->isDirty('telegram_message_id')) {
-            echo 'Done';
-        }
+
     }
 
     public function deleted(Post $post): void

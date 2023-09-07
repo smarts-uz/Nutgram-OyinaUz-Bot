@@ -43,9 +43,9 @@ class TelegramBotService
         return TgBot::where('id', $id)->first();
     }
 
-    public function botSendMessage(Nutgram $bot, $post,$botId)
+    public function botSendMessage(Nutgram $bot, $post, $botId)
     {
-        $tgGroups = TgGroup::where('tg_bot_id',$botId)->where('tg_bot_on',true)->get();
+        $tgGroups = TgGroup::where('tg_bot_id', $botId)->where('tg_bot_on', true)->get();
 
         [$media, $fileContents] = $this->fileCheckService->fileCheck($post);
         switch ($media) {
@@ -61,8 +61,15 @@ class TelegramBotService
                             'caption' => $post->content,
                             'reply_markup' => $keyboard,
                         ]);
+
+                        $isChannel = $message->chat->isChannel();
+
+                        if ($isChannel) {
+                            $this->saveChatId($post, $message);
+                        }
+
                         $this->fileCheckService->closeFile($photo);
-                        $this->saveChatId($post, $message);
+                        $this->saveMessageId($post, $message);
                     }
 
                 }
@@ -81,8 +88,15 @@ class TelegramBotService
                             'reply_markup' => $keyboard,
                         ]);
 
+                        $isChannel = $message->chat->isChannel();
+
+
+                        if ($isChannel) {
+                            $this->saveChatId($post, $message);
+                        }
+
                         $this->fileCheckService->closeFile($photo);
-                        $this->saveChatId($post, $message);
+                        $this->saveMessageId($post, $message);
                     }
                 }
                 break;
@@ -91,23 +105,57 @@ class TelegramBotService
         }
     }
 
-    public function botDeleteMessage(Nutgram $bot, $post,$botId)
+    public function botDeleteMessage(Nutgram $bot, $post, $botId)
     {
-        try {
-            $tgGroups = TgGroup::where('tg_bot_id',$botId)->where('tg_bot_on',true)->get();
+        $tgGroups = TgGroup::where('tg_bot_id', $botId)->where('tg_bot_on', true)->get();
+
+
+        if (!empty($tgGroups)) {
             foreach ($tgGroups as $group) {
                 $bot->deleteMessage($group->group_id, $post->tg_message_id);
             }
-
-        } catch (\Exception $exception) {
-            Debugbar::info($exception);
         }
+
+    }
+
+    public function saveMessageId($post, $message)
+    {
+        $post->tg_message_id = $message->message_id;
+        $post->saveQuietly();
     }
 
     public function saveChatId($post, $message)
     {
-        $post->tg_message_id = $message->message_id;
+        $post->tg_chat_title = $message->chat->username;
+        $post->tg_groups_id = $message->chat->id;
         $post->saveQuietly();
+    }
+
+    public function createPostTgUrl($post)
+    {
+        $tgChatTitle = $post->tg_chat_title;
+        $tgMessageId = $post->tg_message_id;
+
+        $post->tg_public_url = "https://t.me/{$tgChatTitle}/{$tgMessageId}";
+//        $url = "<a href=\"https://t.me/{$tgChatTitle}/{$tgMessageId}\">{$post->url_title}</a>";
+//
+//
+//        $content = "{$post->content} \n $url";
+//        $post->content = $content;
+        $post->saveQuietly();
+    }
+
+    public function botEditeMessage(Nutgram $bot, $chatId, $messageId, $caption,$post)
+    {
+        $keyboard = $this->buttonService->botCreateInlineButtons($post);
+
+        $bot->editMessageCaption([
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'caption' => $caption,
+            'reply_markup' => $keyboard,
+            'parse_mode' => 'html',
+        ]);
     }
 
     public function buttonsAction($messageId, $callbackData, $userId)
@@ -137,7 +185,7 @@ class TelegramBotService
 
     public static function execInBackground($cmd)
     {
-        pclose(popen("start /B ". $cmd, "r"));
+        pclose(popen("start /B " . $cmd, "r"));
     }
 
 

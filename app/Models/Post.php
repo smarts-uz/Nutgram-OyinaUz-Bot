@@ -20,7 +20,9 @@ class Post extends Model
         'content',
         'telegram_message_id',
         'user_id',
-        'company_id'
+        'company_id',
+        'url_title',
+        'tg_chat_title'
     ];
     protected $table = 'tg_posts';
 
