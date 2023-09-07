@@ -29,7 +29,11 @@ class ButtonResource extends Resource
             Text::make(trans('moonshine::ui.custom.buttons'),'title')->showOnExport()->useOnImport(),
             Text::make(trans('moonshine::ui.custom.action_count'),'count')->showOnExport()->useOnImport(),
             Text::make(trans('moonshine::ui.custom.post_title'),'id', function (BotButton $botButton) {
+                if (!empty($botButton->post->title)) {
                 return $botButton->post->title;
+                } else {
+                    return null;
+                }
             })->hideOnCreate()->hideOnUpdate(),
             BelongsTo::make('Post Id','post')->showOnExport()->useOnImport()->hideOnIndex()->hideOnCreate()->hideOnUpdate(),
 
