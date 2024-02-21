@@ -17,7 +17,6 @@ use App\Telegram\Middleware\TelegramBotCollectChat;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Queue;
-use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\RunningMode\Polling;
 use SergiX44\Nutgram\RunningMode\Webhook;
@@ -36,7 +35,6 @@ class BotController extends Controller
         $bot = new Nutgram($tgBot->bot_token,
             ['cache' => $cache]);
 //
-        Log::info($bot->getMe()->username);
         $tgBot->update(['bot_username' => $bot->getMe()->username]);
 
         $bot->middleware(function (Nutgram $bot, $next) {
@@ -58,7 +56,6 @@ class BotController extends Controller
         $bot->onCallbackQuery(function (Nutgram $bot) {
             $callbackData = $bot->callbackQuery()->data;
              $chatId = $bot->callbackQuery()->message->chat->id;
-             Log::info("chat id {$chatId}");
             $keyboardService = new TelegramBotButtonCreator();
             $botService = new TelegramBotService();
 
@@ -98,7 +95,6 @@ class BotController extends Controller
             }
 
         });
-//
         $bot->onNewChatTitle(function (Nutgram $bot) {
             $newTitle = $bot->chat()->title;
             $groupId = $bot->message()->chat->id;

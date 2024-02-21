@@ -30,7 +30,6 @@ class TelegramBotService
 
     public function setCache($id)
     {
-        Log::warning("id {$id}");
         $botToken = TgBot::where('id', $id)->first()->bot_token;
         $cacheDirectory = storage_path('cache/' . md5($botToken));
 
@@ -52,7 +51,6 @@ class TelegramBotService
         [$media, $fileContents] = $this->fileCheckService->fileCheck($post);
         switch ($media) {
             case 'photo':
-                Log::info("sending photo");
                 $photo = fopen($fileContents, 'r+');
                 if ($photo) {
                     $keyboard = $this->buttonService->botCreateInlineButtons($post);
@@ -78,7 +76,6 @@ class TelegramBotService
                 }
                 break;
             case 'video':
-                Log::info("sending video");
                 $photo = fopen($fileContents, 'r+');
                 if ($photo) {
                     $keyboard = $this->buttonService->botCreateInlineButtons($post);
@@ -104,7 +101,6 @@ class TelegramBotService
                 }
                 break;
             default:
-                Log::info("no media");
                 foreach ($tgGroups as $group) {
 
                 $message = $bot->sendMessage($post->content, ['chat_id' => $group->group_id]);
@@ -183,7 +179,6 @@ class TelegramBotService
             $button = $post->button->where('title', $callbackData)->first();
 
             }
-            Log::info("callbackdata: {$callbackData}");
         $user = TelegramUser::where('telegram_id', $userId)->first();
 
 

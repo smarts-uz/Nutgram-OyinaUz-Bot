@@ -32,10 +32,8 @@ class PostObserver
 
         if ($post->isDirty('is_published')) {
             if ($post->is_published == true) {
-                Log::info("post observer sending ");
                 $botService->botSendMessage($bot, $post,$botId->id);
             } else {
-                Log::info("post observer deleting");
                 $botService->botDeleteMessage($bot, $post,$botId->id);
 
             }

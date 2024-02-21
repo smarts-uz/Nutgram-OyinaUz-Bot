@@ -41,7 +41,7 @@ class PostResource extends Resource
                Column::make([
                    Block::make(trans('moonshine::ui.custom.basic_info'),[
                        Text::make(trans('moonshine::ui.custom.post_title'),'title')->required()->showOnExport()->useOnImport(),
-//                       Text::make(trans('Telegram Post Url Title'),'url_title')->required()->showOnExport()->useOnImport()->hideOnIndex(),
+                       Text::make(trans('Telegram Post Url Title'),'url_title')->required()->showOnExport()->useOnImport()->hideOnIndex(),
                        Textarea::make(trans('moonshine::ui.custom.content'),'content')->required()->showOnExport()->useOnImport(),
                    ]),
                ]),
