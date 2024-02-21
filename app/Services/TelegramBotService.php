@@ -9,6 +9,7 @@ use App\Models\TelegramUser;
 use App\Models\TgBot;
 use App\Models\TgGroup;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
@@ -29,6 +30,7 @@ class TelegramBotService
 
     public function setCache($id)
     {
+        Log::warning("id {$id}");
         $botToken = TgBot::where('id', $id)->first()->bot_token;
         $cacheDirectory = storage_path('cache/' . md5($botToken));
 
@@ -50,6 +52,7 @@ class TelegramBotService
         [$media, $fileContents] = $this->fileCheckService->fileCheck($post);
         switch ($media) {
             case 'photo':
+                Log::info("sending photo");
                 $photo = fopen($fileContents, 'r+');
                 if ($photo) {
                     $keyboard = $this->buttonService->botCreateInlineButtons($post);
@@ -75,7 +78,7 @@ class TelegramBotService
                 }
                 break;
             case 'video':
-
+                Log::info("sending video");
                 $photo = fopen($fileContents, 'r+');
                 if ($photo) {
                     $keyboard = $this->buttonService->botCreateInlineButtons($post);
@@ -101,6 +104,13 @@ class TelegramBotService
                 }
                 break;
             default:
+                Log::info("no media");
+                foreach ($tgGroups as $group) {
+
+                $message = $bot->sendMessage($post->content, ['chat_id' => $group->group_id]);
+                    $this->saveMessageId($post, $message);
+                }
+
                 Debugbar::info('Error');
         }
     }
@@ -112,7 +122,15 @@ class TelegramBotService
 
         if (!empty($tgGroups)) {
             foreach ($tgGroups as $group) {
-                $bot->deleteMessage($group->group_id, $post->tg_message_id);
+                if($post->tg_message_id){
+
+                    try {
+                        $bot->deleteMessage($group->group_id, $post->tg_message_id);
+                    } catch (\Exception $e) {
+                        Log::warning($e->getMessage().$e->getFile().$e->getLine());
+                    }
+
+                }
             }
         }
 
@@ -160,9 +178,14 @@ class TelegramBotService
 
     public function buttonsAction($messageId, $callbackData, $userId)
     {
-        $post = Post::where('tg_message_id', $messageId)->first();
-        $button = $post->button()->where('title', $callbackData)->first();
+            $post = Post::with('button')->where('tg_message_id', $messageId)->first();
+            if($post?->button?->count()){
+            $button = $post->button->where('title', $callbackData)->first();
+
+            }
+            Log::info("callbackdata: {$callbackData}");
         $user = TelegramUser::where('telegram_id', $userId)->first();
+
 
         if (!empty($post && $button && $user)) {
             $postUser = PostUser::where('tg_user_id', $user->id)->where('tg_post_id', $post->id)->first();

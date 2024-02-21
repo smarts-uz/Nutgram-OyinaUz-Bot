@@ -3,9 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Post;
+use App\Models\TgBot;
 use App\Services\TelegramBotButtonCreator;
 use App\Services\TelegramBotService;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Log;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\RunningMode\Webhook;
 
@@ -23,14 +25,19 @@ class PostObserver
         $botService = new TelegramBotService();
         $botId = $botService->getBotById($post->bot_id);
 
+
         $bot = new Nutgram($botId->bot_token);
+
+
 
         if ($post->isDirty('is_published')) {
             if ($post->is_published == true) {
+                Log::info("post observer sending ");
                 $botService->botSendMessage($bot, $post,$botId->id);
-
             } else {
+                Log::info("post observer deleting");
                 $botService->botDeleteMessage($bot, $post,$botId->id);
+
             }
             $channelId = $post->tg_groups_id;
             $messageId = $post->tg_message_id;
